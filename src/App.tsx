@@ -14,7 +14,6 @@ import {
   Menu,
   X,
   ArrowUpRight,
-  Sparkles
 } from 'lucide-react';
 
 // --- Types ---
@@ -33,32 +32,32 @@ interface Project {
 const PROJECTS: Project[] = [
   {
     id: 1,
-    title: "EcoSphere Dashboard",
-    description: "A comprehensive environmental monitoring dashboard with real-time data visualization and predictive analytics.",
-    image: "https://picsum.photos/seed/eco/800/600",
-    tags: ["React", "D3.js", "UI/UX"],
-    github: "#",
-    demo: "#",
+    title: "YouTube SEO Tool v2",
+    description: "A keyword-focused optimization tool for creators that improves titles, tags, and descriptions using score-based suggestions and practical SEO checks.",
+    image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=1200&q=80",
+    tags: ["React", "SEO", "Analytics"],
+    github: "https://github.com/waheeda129/youtube-seo-tool-v2",
+    demo: "https://github.com/waheeda129/youtube-seo-tool-v2",
     color: "from-emerald-100/50 to-teal-100/50"
   },
   {
     id: 2,
-    title: "Lumina E-Commerce",
-    description: "Minimalist fashion marketplace focusing on high-end sustainable brands with a seamless checkout experience.",
-    image: "https://picsum.photos/seed/lumina/800/600",
-    tags: ["Frontend", "Tailwind", "Figma"],
-    github: "#",
-    demo: "#",
+    title: "Cinema Management System",
+    description: "A cinema operations dashboard to manage movie schedules, seat availability, ticket bookings, and daily revenue tracking in one place.",
+    image: "https://images.unsplash.com/photo-1440404653325-ab127d49abc1?auto=format&fit=crop&w=1200&q=80",
+    tags: ["Dashboard", "Booking", "UI/UX"],
+    github: "https://github.com/waheeda129?tab=repositories",
+    demo: "mailto:waheedagillani728@gmail.com?subject=Demo%20Request%20-%20Cinema%20Management%20System",
     color: "from-rose-100/50 to-orange-100/50"
   },
   {
     id: 3,
-    title: "Zenith Task Manager",
-    description: "A productivity tool designed for creative teams, featuring intuitive drag-and-drop workflows and team collaboration.",
-    image: "https://picsum.photos/seed/zenith/800/600",
-    tags: ["JavaScript", "Motion", "UX"],
-    github: "#",
-    demo: "#",
+    title: "Customer Relationship Management System",
+    description: "A CRM platform focused on lead tracking, follow-ups, and client history so teams can maintain healthy pipelines and improve conversion consistency.",
+    image: "https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=1200&q=80",
+    tags: ["CRM", "TypeScript", "Productivity"],
+    github: "https://github.com/waheeda129?tab=repositories",
+    demo: "mailto:waheedagillani728@gmail.com?subject=Demo%20Request%20-%20Customer%20Relationship%20Management%20System",
     color: "from-blue-100/50 to-indigo-100/50"
   }
 ];
@@ -66,6 +65,12 @@ const PROJECTS: Project[] = [
 const SKILLS = {
   frontend: ["HTML5", "CSS3", "JavaScript", "TypeScript", "React", "Tailwind CSS"],
   tools: ["Figma", "VS Code", "GitHub", "Adobe XD", "Responsive Design"]
+};
+
+const SOCIAL_LINKS = {
+  github: "https://github.com/waheeda129",
+  linkedin: "https://www.linkedin.com/in/waheeda-gillani-b8093430b",
+  email: "mailto:waheedagillani728@gmail.com?subject=Portfolio%20Contact",
 };
 
 // --- Components ---
@@ -92,23 +97,53 @@ const Navbar = () => {
       <div className="max-w-7xl mx-auto px-6">
         <div className={`glass rounded-full px-8 py-4 flex justify-between items-center transition-all duration-500 ${isScrolled ? 'shadow-lg' : 'shadow-none border-transparent bg-transparent'}`}>
           <a href="#" className="text-xl font-bold tracking-tighter text-stone-900 flex items-center gap-2 group">
-            <div className="w-8 h-8 bg-stone-900 rounded-full flex items-center justify-center text-white group-hover:rotate-12 transition-transform">
-              <Sparkles size={16} />
+            <div className="w-8 h-8 bg-stone-900 rounded-full flex items-center justify-center text-white group-hover:scale-105 transition-transform">
+              <span className="text-[10px] font-bold tracking-wide">WG</span>
             </div>
             <span>WG.</span>
           </a>
           
           {/* Desktop Nav */}
-          <div className="hidden md:flex gap-10">
-            {navLinks.map((link) => (
-              <a 
-                key={link.name} 
-                href={link.href} 
-                className="text-xs font-bold uppercase tracking-widest text-stone-500 hover:text-stone-900 transition-colors"
+          <div className="hidden md:flex items-center gap-8">
+            <div className="flex gap-10">
+              {navLinks.map((link) => (
+                <a 
+                  key={link.name} 
+                  href={link.href} 
+                  className="text-xs font-bold uppercase tracking-widest text-stone-500 hover:text-stone-900 transition-colors"
+                >
+                  {link.name}
+                </a>
+              ))}
+            </div>
+            <div className="h-5 w-px bg-stone-200" />
+            <div className="flex items-center gap-4">
+              <a
+                href={SOCIAL_LINKS.github}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="GitHub"
+                className="text-stone-400 hover:text-stone-900 transition-colors"
               >
-                {link.name}
+                <Github size={18} />
               </a>
-            ))}
+              <a
+                href={SOCIAL_LINKS.linkedin}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="LinkedIn"
+                className="text-stone-400 hover:text-stone-900 transition-colors"
+              >
+                <Linkedin size={18} />
+              </a>
+              <a
+                href={SOCIAL_LINKS.email}
+                aria-label="Email"
+                className="text-stone-400 hover:text-stone-900 transition-colors"
+              >
+                <Mail size={18} />
+              </a>
+            </div>
           </div>
 
           {/* Mobile Toggle */}
@@ -140,6 +175,33 @@ const Navbar = () => {
                 {link.name}
               </a>
             ))}
+            <div className="pt-4 border-t border-stone-200/60 flex items-center gap-6">
+              <a
+                href={SOCIAL_LINKS.github}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="GitHub"
+                className="text-stone-400 hover:text-stone-900 transition-colors"
+              >
+                <Github size={22} />
+              </a>
+              <a
+                href={SOCIAL_LINKS.linkedin}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="LinkedIn"
+                className="text-stone-400 hover:text-stone-900 transition-colors"
+              >
+                <Linkedin size={22} />
+              </a>
+              <a
+                href={SOCIAL_LINKS.email}
+                aria-label="Email"
+                className="text-stone-400 hover:text-stone-900 transition-colors"
+              >
+                <Mail size={22} />
+              </a>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
@@ -233,14 +295,14 @@ export default function App() {
 
       <main className="relative z-10">
         {/* Hero Section */}
-        <section className="min-h-screen flex flex-col justify-center px-6 pt-20">
-          <div className="max-w-7xl mx-auto w-full text-center">
+        <section className="min-h-screen flex flex-col justify-center px-6 pt-36 md:pt-40">
+          <div className="max-w-6xl mx-auto w-full text-center">
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
             >
-              <h1 className="text-6xl md:text-8xl lg:text-9xl font-extrabold tracking-tighter text-stone-900 mb-12 leading-[0.9] text-gradient">
+              <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-extrabold tracking-tight text-stone-900 mb-12 leading-[1.06] md:leading-[1.04] text-gradient">
                 Designing <br />
                 Experiences That <br />
                 Feel Effortless
@@ -289,13 +351,6 @@ export default function App() {
           
           {/* Floating Elements */}
           <div className="absolute inset-0 pointer-events-none overflow-hidden">
-            <motion.div 
-              animate={{ y: [0, -20, 0], rotate: [0, 10, 0] }}
-              transition={{ duration: 5, repeat: Infinity }}
-              className="absolute top-[20%] left-[10%] w-12 h-12 glass rounded-2xl flex items-center justify-center text-rose-300"
-            >
-              <Sparkles size={24} />
-            </motion.div>
             <motion.div 
               animate={{ y: [0, 20, 0], rotate: [0, -15, 0] }}
               transition={{ duration: 7, repeat: Infinity }}
@@ -512,6 +567,30 @@ export default function App() {
                   )}
                 </button>
               </form>
+              <div className="mt-10 pt-8 border-t border-stone-200/60 flex flex-wrap justify-center gap-4">
+                <a
+                  href={SOCIAL_LINKS.linkedin}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-6 py-3 rounded-full bg-white/60 hover:bg-white text-stone-700 font-semibold text-sm transition-colors"
+                >
+                  Connect on LinkedIn
+                </a>
+                <a
+                  href={SOCIAL_LINKS.github}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-6 py-3 rounded-full bg-white/60 hover:bg-white text-stone-700 font-semibold text-sm transition-colors"
+                >
+                  View GitHub
+                </a>
+                <a
+                  href={SOCIAL_LINKS.email}
+                  className="px-6 py-3 rounded-full bg-stone-900 hover:bg-stone-800 text-white font-semibold text-sm transition-colors"
+                >
+                  Email Me
+                </a>
+              </div>
             </motion.div>
           </div>
         </section>
@@ -521,9 +600,31 @@ export default function App() {
       <footer className="py-20 px-6 border-t border-stone-100 relative z-10">
         <div className="max-w-7xl mx-auto flex flex-col items-center gap-12">
           <div className="flex gap-10">
-            <a href="#" className="text-stone-300 hover:text-stone-900 transition-colors transform hover:scale-110"><Github size={24} /></a>
-            <a href="#" className="text-stone-300 hover:text-stone-900 transition-colors transform hover:scale-110"><Linkedin size={24} /></a>
-            <a href="#" className="text-stone-300 hover:text-stone-900 transition-colors transform hover:scale-110"><Mail size={24} /></a>
+            <a
+              href={SOCIAL_LINKS.github}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="GitHub"
+              className="text-stone-300 hover:text-stone-900 transition-colors transform hover:scale-110"
+            >
+              <Github size={24} />
+            </a>
+            <a
+              href={SOCIAL_LINKS.linkedin}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="LinkedIn"
+              className="text-stone-300 hover:text-stone-900 transition-colors transform hover:scale-110"
+            >
+              <Linkedin size={24} />
+            </a>
+            <a
+              href={SOCIAL_LINKS.email}
+              aria-label="Email"
+              className="text-stone-300 hover:text-stone-900 transition-colors transform hover:scale-110"
+            >
+              <Mail size={24} />
+            </a>
           </div>
           <div className="text-stone-400 text-xs font-bold uppercase tracking-[0.3em] text-center">
             © {new Date().getFullYear()} Waheeda Gillani <br />
