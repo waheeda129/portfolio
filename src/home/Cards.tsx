@@ -1,20 +1,9 @@
 import {useEffect, useRef, useState, type ReactNode, type RefObject} from 'react';
 import {motion} from 'framer-motion';
-import {
-  Building2,
-  ExternalLink,
-  History,
-  MapPin,
-  Pause,
-  PenTool,
-  Play,
-  SkipBack,
-  SkipForward,
-  Store,
-  Workflow,
-} from 'lucide-react';
+import {Building2, History, MapPin, Store, Workflow} from 'lucide-react';
 import {easeInOut, useClock, useTick} from '../clock';
 import {STEPS, TIMELINE} from '../data';
+import {StockPanel, TamxPanel} from '../components/Visuals';
 
 const SHADOW = '0px 1px 2px rgba(30, 28, 26, 0.04), 0px 10px 24px -14px rgba(30, 28, 26, 0.14)';
 const SHADOW_LIFT = '0px 3px 6px rgba(30, 28, 26, 0.05), 0px 20px 36px -16px rgba(30, 28, 26, 0.24)';
@@ -24,23 +13,30 @@ const lift = {
   hover: {y: -3, boxShadow: SHADOW_LIFT},
 };
 
+/** Cards that go somewhere lift on hover; cards that don't stay still, so nothing promises a click it can't keep. */
 function Card({className, children, href, label}: {className: string; children: ReactNode; href?: string; label?: string}) {
-  const common = {
-    className: `card ${className}`,
-    initial: 'rest' as const,
-    animate: 'rest' as const,
-    whileHover: 'hover' as const,
-    variants: lift,
-    transition: {duration: 0.25, ease: [0.22, 1, 0.36, 1] as const},
-  };
   if (href) {
     return (
-      <motion.a href={href} aria-label={label} {...common}>
+      <motion.a
+        href={href}
+        aria-label={label}
+        className={`card is-link ${className}`}
+        initial="rest"
+        animate="rest"
+        whileHover="hover"
+        whileFocus="hover"
+        variants={lift}
+        transition={{duration: 0.25, ease: [0.22, 1, 0.36, 1]}}
+      >
         {children}
       </motion.a>
     );
   }
-  return <motion.article {...common}>{children}</motion.article>;
+  return (
+    <article className={`card ${className}`} style={{boxShadow: SHADOW}}>
+      {children}
+    </article>
+  );
 }
 
 function Chip({icon, children}: {icon: ReactNode; children: ReactNode}) {
@@ -90,7 +86,7 @@ export function ExperienceCard() {
     ));
 
   return (
-    <Card className="experience">
+    <Card className="experience" href="/about#experience" label="Experience: Mapalz, TAMx, SaleForgers and COMSATS. See the full timeline">
       <Chip icon={<History {...ico} />}>Experience</Chip>
       <div
         className="tl-window"
@@ -108,130 +104,17 @@ export function ExperienceCard() {
   );
 }
 
-/* ---------------- SaleForgers: delivery tracker ---------------- */
-
-const TOTAL_DAYS = 42;
-const DAY_MS = 900;
-const STAGES = [
-  {name: 'Discovery', start: 0},
-  {name: 'Scope & design', start: 5},
-  {name: 'Build & test', start: 12},
-  {name: 'Launch & support', start: 36},
-];
-const stageAt = (day: number) => {
-  let idx = 0;
-  STAGES.forEach((s, i) => {
-    if (day >= s.start) idx = i;
-  });
-  return idx;
-};
+/* ---------------- SaleForgers ---------------- */
 
 export function SaleForgersCard() {
-  const {reduced} = useClock();
-  const [playing, setPlaying] = useState(!reduced);
-  // While playing, day = base + (t - anchor) / DAY_MS, read from the shared clock.
-  const st = useRef({day: 8, base: 8, anchor: 0, now: 0, playing: !reduced, stage: -1});
-  const fill = useRef<HTMLSpanElement>(null);
-  const dayEl = useRef<HTMLSpanElement>(null);
-  const stageEl = useRef<HTMLSpanElement>(null);
-
-  const setDay = (day: number) => {
-    const s = st.current;
-    s.day = s.base = day;
-    s.anchor = s.now;
-  };
-
-  useEffect(() => {
-    const s = st.current;
-    s.playing = playing;
-    setDay(s.day);
-  }, [playing]);
-
-  useTick((t) => {
-    const s = st.current;
-    s.now = t;
-    if (s.playing) {
-      s.day = s.base + (t - s.anchor) / DAY_MS;
-      if (s.day >= TOTAL_DAYS) {
-        s.base = 0;
-        s.anchor = t;
-        s.day = 0;
-      }
-    }
-    if (fill.current) fill.current.style.transform = `scaleX(${(s.day / TOTAL_DAYS).toFixed(4)})`;
-    if (dayEl.current) dayEl.current.textContent = `Day ${Math.floor(s.day) + 1}`;
-    const idx = stageAt(s.day);
-    if (idx !== s.stage && stageEl.current) {
-      s.stage = idx;
-      stageEl.current.textContent = STAGES[idx].name;
-    }
-  });
-
-  const jump = (dir: -1 | 1) => {
-    const s = st.current;
-    const idx = stageAt(s.day);
-    if (dir === 1) setDay(STAGES[(idx + 1) % STAGES.length].start);
-    else setDay(s.day - STAGES[idx].start > 1 ? STAGES[idx].start : STAGES[(idx + STAGES.length - 1) % STAGES.length].start);
-  };
-
   return (
-    <Card className="saleforgers">
+    <Card className="saleforgers" href="/work/saleforgers" label="SaleForgers, Co-founder and COO. Read the case study">
       <Chip icon={<Building2 {...ico} />}>Co-founder & COO</Chip>
-      <div className="sf-cover">
-        <img src="/assets/saleforgers-mark.webp" width={267} height={400} alt="" />
-      </div>
-      <div className="sf-body">
-        <h2 className="sf-name">
-          <a href="/work#saleforgers">SaleForgers</a>
-        </h2>
-        <p className="sf-sub">Custom software and automation for growing businesses</p>
-
-        <div className="sf-track">
-          <div className="sf-track-head">
-            <span ref={stageEl} className="sf-stage">
-              Scope & design
-            </span>
-            <span className="sf-note">Sample delivery timeline</span>
-          </div>
-          <span className="sf-bar" aria-hidden="true">
-            <span ref={fill} className="sf-fill" />
-          </span>
-          <div className="sf-times">
-            <span ref={dayEl}>Day 9</span>
-            <span>{TOTAL_DAYS} days</span>
-          </div>
-        </div>
-
-        <div className="sf-controls">
-          <button type="button" className="ctl" onClick={() => jump(-1)} aria-label="Previous stage">
-            <SkipBack size={16} strokeWidth={1.7} fill="currentColor" aria-hidden="true" />
-          </button>
-          <button
-            type="button"
-            className="ctl ctl-main"
-            onClick={() => setPlaying((p) => !p)}
-            aria-label={playing ? 'Pause timeline' : 'Play timeline'}
-            aria-pressed={playing}
-          >
-            {playing ? (
-              <Pause size={14} fill="currentColor" strokeWidth={0} aria-hidden="true" />
-            ) : (
-              <Play size={14} fill="currentColor" strokeWidth={0} aria-hidden="true" className="nudge" />
-            )}
-          </button>
-          <button type="button" className="ctl" onClick={() => jump(1)} aria-label="Next stage">
-            <SkipForward size={16} strokeWidth={1.7} fill="currentColor" aria-hidden="true" />
-          </button>
-          <a
-            className="ctl ctl-end"
-            href="https://saleforgers.com"
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label="Visit saleforgers.com (opens in a new tab)"
-          >
-            <ExternalLink size={16} strokeWidth={1.7} aria-hidden="true" />
-          </a>
-        </div>
+      <h2 className="sf-title">SaleForgers</h2>
+      <p className="sf-sub">Custom software and automation for growing businesses</p>
+      <p className="sf-shipped">Shipped StockFlow and FaceAttend</p>
+      <div className="sf-panel">
+        <StockPanel compact />
       </div>
     </Card>
   );
@@ -241,7 +124,7 @@ export function SaleForgersCard() {
 
 export function MapalzCard() {
   return (
-    <Card className="mapalz" href="/work#mapalz" label="Mapalz, founding team. Read more about my work there">
+    <Card className="mapalz" href="/work/mapalz" label="Mapalz, founding team. Read the case study">
       <Chip icon={<Store {...ico} />}>Founding team</Chip>
       <h2 className="mz-title">Mapalz</h2>
       <p className="mz-sub">One platform for wholesalers, sellers and customers</p>
@@ -323,15 +206,8 @@ export function MapCard() {
 
 export function TamxCard() {
   return (
-    <Card className="tamx" href="/work#tamx" label="UI/UX Designer at TAMx. Read more about my work there">
-      <div className="tamx-inset">
-        <img className="tamx-glow" src="/assets/tamx-glow.webp" alt="" width={400} height={446} />
-        <img className="tamx-logo" src="/assets/tamx-logo.webp" alt="TAMx" width={807} height={309} />
-        <span className="tamx-pill">
-          <PenTool size={13} strokeWidth={1.9} aria-hidden="true" />
-          UI/UX Designer at TAMx
-        </span>
-      </div>
+    <Card className="tamx" href="/work/tamx" label="UI/UX Designer at TAMx. Read the case study">
+      <TamxPanel />
     </Card>
   );
 }

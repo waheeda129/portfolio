@@ -60,12 +60,20 @@ export function useClock() {
   return ctx;
 }
 
+/** The clock when rendered inside the home page, otherwise null (static rendering). */
+export function useClockOptional() {
+  return useContext(ClockContext);
+}
+
 /** Subscribe to every clock tick (ms). The callback runs inside the shared frame loop. */
-export function useTick(cb: (t: number) => void) {
-  const {time} = useClock();
+export function useTick(cb: (t: number) => void, enabled = true) {
+  const ctx = useContext(ClockContext);
   const saved = useRef(cb);
   saved.current = cb;
-  useEffect(() => time.on('change', (t) => saved.current(t)), [time]);
+  useEffect(() => {
+    if (!ctx || !enabled) return;
+    return ctx.time.on('change', (t) => saved.current(t));
+  }, [ctx, enabled]);
 }
 
 /** Entrance: rise 14px and fade in over 0.7s, staggered 80ms in DOM order. */

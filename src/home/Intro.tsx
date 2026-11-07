@@ -1,117 +1,62 @@
-import {useRef, useState} from 'react';
+import {useRef} from 'react';
 import {motion, useTransform} from 'framer-motion';
-import {Pause, Play} from 'lucide-react';
-import {useClock, useTick} from '../clock';
+import {easeInOut, useClock, useTick} from '../clock';
+import {NOW} from '../data';
 
-function mulberry32(seed: number) {
-  let a = seed;
-  return () => {
-    a |= 0;
-    a = (a + 0x6d2b79f5) | 0;
-    let t = Math.imul(a ^ (a >>> 15), 1 | a);
-    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
-}
+const NOW_EVERY = 3400;
+const NOW_SWITCH = 420;
+const NOW_FIRST = 2800;
 
-/** 78 seeded bar heights (px) with two loud bursts. */
-const BARS = (() => {
-  const r = mulberry32(129);
-  return Array.from({length: 78}, (_, i) => {
-    const base = 4 + r() * 9;
-    const burst = 17 * Math.exp(-((i - 21) ** 2) / 18) + 15 * Math.exp(-((i - 54) ** 2) / 14);
-    return Math.round(Math.min(28, base + burst * (0.75 + r() * 0.35)));
-  });
-})();
-
-const VOICE_START = 1300;
-const VOICE_LENGTH = 32000;
-
-const fmt = (ms: number) => {
-  const s = Math.floor(ms / 1000);
-  return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
-};
-
-export function VoiceNote() {
+/** "Now" line: what Waheeda is working on, rotating on the shared clock. */
+export function NowLine() {
   const {reduced} = useClock();
-  const [playing, setPlaying] = useState(false);
-  // While playing, elapsed = t - anchor, read straight from the shared clock.
-  const st = useRef({playing: false, elapsed: 0, anchor: 0, now: 0, touched: false});
-  const bars = useRef<(HTMLSpanElement | null)[]>([]);
-  const timer = useRef<HTMLSpanElement>(null);
+  const outEl = useRef<HTMLSpanElement>(null);
+  const inEl = useRef<HTMLSpanElement>(null);
+  const st = useRef({shown: -1, painted: -1, hover: false, held: 0, last: 0});
 
   useTick((t) => {
     const s = st.current;
-    s.now = t;
-
-    if (!s.touched && !reduced && t >= VOICE_START) {
-      s.touched = true;
-      s.playing = true;
-      s.anchor = VOICE_START;
-      setPlaying(true);
+    if (s.hover) s.held += Math.max(0, t - s.last);
+    s.last = t;
+    if (reduced) return;
+    const local = t - s.held - NOW_FIRST;
+    const idx = local < 0 ? 0 : Math.floor(local / NOW_EVERY) + 1;
+    const since = local < 0 ? Infinity : local - (idx - 1) * NOW_EVERY;
+    const cur = idx % NOW.length;
+    const prev = (idx - 1 + NOW.length) % NOW.length;
+    if (cur !== s.shown) {
+      s.shown = cur;
+      if (outEl.current) outEl.current.textContent = NOW[prev];
+      if (inEl.current) inEl.current.textContent = NOW[cur];
     }
-    if (s.playing) {
-      s.elapsed = t - s.anchor;
-      if (s.elapsed >= VOICE_LENGTH) {
-        s.elapsed = 0;
-        s.playing = false;
-        setPlaying(false);
-      }
+    const raw = Math.min(1, since / NOW_SWITCH);
+    if (raw === 1 && s.painted === cur) return;
+    const e = easeInOut(raw);
+    if (outEl.current) {
+      outEl.current.style.transform = `translateY(${(-18 * e).toFixed(2)}px)`;
+      outEl.current.style.opacity = raw === 1 ? '0' : (1 - e).toFixed(3);
     }
-
-    const head = (s.elapsed / VOICE_LENGTH) * BARS.length;
-    for (let i = 0; i < BARS.length; i++) {
-      const el = bars.current[i];
-      if (!el) continue;
-      let k = 1;
-      if (s.playing && !reduced) {
-        const d = Math.abs(i + 0.5 - head);
-        if (d < 4) k = 1 + 0.55 * (1 - d / 4) * (0.55 + 0.45 * Math.sin(t / 95 + i * 1.7));
-      }
-      el.style.transform = `scaleY(${k.toFixed(3)})`;
-      el.dataset.played = i < head ? 'y' : 'n';
+    if (inEl.current) {
+      inEl.current.style.transform = `translateY(${(18 * (1 - e)).toFixed(2)}px)`;
+      inEl.current.style.opacity = e.toFixed(3);
     }
-    if (timer.current) timer.current.textContent = fmt(s.elapsed);
+    if (raw === 1) s.painted = cur;
   });
 
-  const toggle = () => {
-    const s = st.current;
-    s.touched = true;
-    s.playing = !s.playing;
-    if (s.playing) s.anchor = s.now - s.elapsed;
-    setPlaying(s.playing);
-  };
-
   return (
-    <div className="pill voice" role="group" aria-label="Voice intro">
-      <button
-        type="button"
-        className="voice-btn"
-        onClick={toggle}
-        aria-label={playing ? 'Pause voice intro' : 'Play voice intro'}
-        aria-pressed={playing}
-      >
-        {playing ? (
-          <Pause size={13} fill="currentColor" strokeWidth={0} aria-hidden="true" />
-        ) : (
-          <Play size={13} fill="currentColor" strokeWidth={0} aria-hidden="true" className="nudge" />
-        )}
-      </button>
-      <span className="wave" aria-hidden="true">
-        {BARS.map((h, i) => (
-          <span
-            key={i}
-            ref={(el) => {
-              bars.current[i] = el;
-            }}
-            className="bar"
-            style={{height: h}}
-          />
-        ))}
+    <div
+      className="pill now"
+      onMouseEnter={() => (st.current.hover = true)}
+      onMouseLeave={() => (st.current.hover = false)}
+    >
+      <span className="now-label">Now</span>
+      <span className="now-window">
+        <span ref={outEl} className="now-text" aria-hidden="true" style={{opacity: 0}} />
+        <span ref={inEl} className="now-text" aria-hidden="true">
+          {NOW[0]}
+        </span>
       </span>
-      <span ref={timer} className="voice-time" aria-hidden="true">
-        0:00
-      </span>
+      <span className="sr-only">Currently: {NOW.join('; ')}.</span>
     </div>
   );
 }
@@ -122,11 +67,11 @@ export function Available() {
   const scale = useTransform(phase, [0, 1], [1, 2.4]);
   const opacity = useTransform(phase, [0, 1], [0.45, 0]);
   return (
-    <div className="pill available">
+    <a className="pill available" href="/contact">
       <span className="dot" aria-hidden="true">
         {!reduced && <motion.span className="halo" style={{scale, opacity}} />}
       </span>
       Available for work
-    </div>
+    </a>
   );
 }
