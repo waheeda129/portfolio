@@ -1,20 +1,27 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# Waheeda Gillani, portfolio
 
-# Run and deploy your AI Studio app
+Personal site for Waheeda Gillani, product and UI/UX designer: Co-founder & COO at SaleForgers, UI/UX Designer at TAMx and part of the founding team at Mapalz.
 
-This contains everything you need to run your app locally.
+- `/` is a bento profile page drawn on a 1440×960 stage that scales to fit any desktop window and becomes a single scrolling column at 820px and below.
+- `/work` covers each role, earlier projects, toolkit, education and contact.
 
-View your app in AI Studio: https://ai.studio/apps/e4538607-cfc6-40ce-b2c2-94b21b741136
+## Stack
 
-## Run Locally
+React 19, Vite, Framer Motion and Inter (self-hosted through `@fontsource-variable/inter`). There is no CSS framework; all styles are in `src/styles.css`.
 
-**Prerequisites:**  Node.js
+## Motion
 
+All motion on the home page reads one clock: the `currentTime` of a long Web Animation on a hidden element, published once per frame through Framer Motion's `useAnimationFrame` (see `src/clock.tsx`). Each card derives its state from that time, so a recorder that pauses and seeks Web Animations captures the page exactly. With `prefers-reduced-motion`, the page renders settled and nothing moves on its own.
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+## Editing content
+
+Text, roles, timeline, process steps, projects and toolkit live in `src/data.ts`. Images are in `public/assets`. The map card loads OpenStreetMap tiles for Bagh, Azad Kashmir; the coordinates are at the top of the `MAP` block in `src/home/Cards.tsx`.
+
+## Run locally
+
+```bash
+npm install
+npm run dev
+```
+
+The dev server runs on http://localhost:3000. `npm run build` writes the production site to `dist/`, which Vercel serves using `vercel.json`.
